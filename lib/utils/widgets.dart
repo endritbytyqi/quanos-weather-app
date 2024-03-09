@@ -5,6 +5,7 @@ class WeatherDetailCard extends StatelessWidget {
   final String value;
   final IconData iconData;
   final Widget? trailing;
+  final Widget? details; 
 
   const WeatherDetailCard({
     Key? key,
@@ -12,6 +13,7 @@ class WeatherDetailCard extends StatelessWidget {
     required this.value,
     required this.iconData,
     this.trailing,
+    this.details, 
   }) : super(key: key);
 
   @override
@@ -19,11 +21,17 @@ class WeatherDetailCard extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       elevation: 2,
-      child: ListTile(
+      child: ExpansionTile(
         leading: Icon(iconData, color: Theme.of(context).primaryColor),
         title: Text(title),
         subtitle: Text(value),
         trailing: trailing,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: details ?? Container(), // Display additional details here
+          ),
+        ],
       ),
     );
   }

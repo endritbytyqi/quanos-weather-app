@@ -3,13 +3,15 @@
 *.log
 *.pyc
 *.swp
+*.env
 .DS_Store
 .atom/
 .buildlog/
 .history
 .svn/
 migrate_working_dir/
-
+config/config.json
+config/
 # IntelliJ related
 *.iml
 *.ipr

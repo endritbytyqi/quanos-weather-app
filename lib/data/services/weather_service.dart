@@ -5,41 +5,97 @@ import 'package:quanos_weather_app/data/models/weather.dart';
 import 'package:quanos_weather_app/utils/api_base.dart';
 
 class WeatherService {
-
-//TOOD: Retry policy, circuit breaker policy in flutter,  exception handling
-//TODO: check if the same request is sent more than 5 times, don't overload the API for 20 sec or smth. 
-
-  final dio = Dio();
+  final Dio dio = Dio();
   final apiBase = APIBase();
+  DateTime? _lastApiCallTime;
+  int _apiCallCount = 0;
+  final int _apiCallThreshold = 10;
+  final Duration _blockDuration = const Duration(seconds: 10);
 
-  void configureDio() {
-    // Set default configs
+  WeatherService() {
+    _configureDio();
+  }
+
+  void _configureDio() {
     dio.options.baseUrl = apiBase.getApiBase();
     dio.options.connectTimeout = const Duration(seconds: 5);
     dio.options.receiveTimeout = const Duration(seconds: 3);
   }
 
-  Future<dynamic> getWeatherForCity(String city, String unit) async {
-    configureDio();
+  Future<WeatherResponseWrapper<WeatherModel>> getWeatherForCity(
+    String city,
+    String unit,
+  ) async {
+    final currentTime = DateTime.now();
+    if (_lastApiCallTime == null ||
+        currentTime.difference(_lastApiCallTime!) >= _blockDuration) {
+      _lastApiCallTime = currentTime;
+      _apiCallCount = 1;
+    } else {
+      // Within block duration
+      if (_apiCallCount >= _apiCallThreshold) {
+        return WeatherResponseWrapper(
+            false, true, "Rate limit exceeded. Please wait.", null);
+      }
+      _apiCallCount++;
+    }
+
     try {
       var response =
-          await dio.get("$city&appid=${apiBase.getAPIKey()}&units=$unit");
-      if (response.data != null) {
+          await dio.get("q=$city&appid=${apiBase.getAPIKey()}&units=$unit");
+      if (response.statusCode == 200) {
         WeatherModel weatherModel = WeatherModel.fromJson(response.data);
-        return WeatherResponseWrapper(true, null, weatherModel);
+        return WeatherResponseWrapper(true, false, null, weatherModel);
+      } else {
+        return WeatherResponseWrapper(false, false, 'No data received', null);
       }
     } on DioException catch (e) {
-      return WeatherResponseWrapper(false, e.message.toString(), null);
+      return WeatherResponseWrapper(false, false, "Error fetching data!", null);
+    } catch (e) {
+      return WeatherResponseWrapper(
+          false, false, "Something went wrong!", null);
     }
   }
 
+  Future<WeatherResponseWrapper<WeatherModel>> getWeatherForLocation(
+      double lat, double lon, String unit) async {
+    final currentTime = DateTime.now();
+    if (_lastApiCallTime == null ||
+        currentTime.difference(_lastApiCallTime!) >= _blockDuration) {
+      _lastApiCallTime = currentTime;
+      _apiCallCount = 1;
+    } else {
+      if (_apiCallCount >= _apiCallThreshold) {
+        return WeatherResponseWrapper(
+            false, true, "Rate limit exceeded. Please wait.", null);
+      }
+      _apiCallCount++;
+    }
 
+    try {
+      var response = await dio
+          .get("lat=$lat&lon=$lon&appid=${apiBase.getAPIKey()}&units=$unit");
+      if (response.statusCode == 200) {
+        WeatherModel weatherModel = WeatherModel.fromJson(response.data);
+        return WeatherResponseWrapper(true, false, null, weatherModel);
+      } else {
+        return WeatherResponseWrapper(false, false, 'No data received', null);
+      }
+    } on DioException catch (e) {
+      return WeatherResponseWrapper(false, false, "Error fetching data!", null);
+    } catch (e) {
+      return WeatherResponseWrapper(
+          false, false, "Something went wrong!", null);
+    }
+  }
 }
 
-class WeatherResponseWrapper {
-  bool isSuccess = false;
+class WeatherResponseWrapper<T> {
+  bool isSuccess;
+  bool rateLimitExceeded;
   String? error;
-  WeatherModel? weatherModel;
+  T? data;
 
-  WeatherResponseWrapper(this.isSuccess, this.error, this.weatherModel);
+  WeatherResponseWrapper(
+      this.isSuccess, this.rateLimitExceeded, this.error, this.data);
 }
