@@ -5,7 +5,7 @@ class WeatherDetailCard extends StatelessWidget {
   final String value;
   final IconData iconData;
   final Widget? trailing;
-  final Widget? details; 
+  final Widget? details;
 
   const WeatherDetailCard({
     Key? key,
@@ -13,7 +13,7 @@ class WeatherDetailCard extends StatelessWidget {
     required this.value,
     required this.iconData,
     this.trailing,
-    this.details, 
+    this.details,
   }) : super(key: key);
 
   @override

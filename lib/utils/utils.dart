@@ -8,4 +8,11 @@ class Utils {
 
     return formattedTime;
   }
+
+  static String capitalizeFirstLetters(String text) {
+    return text.split(' ').map((word) {
+      if (word.isEmpty) return '';
+      return word[0].toUpperCase() + word.substring(1).toLowerCase();
+    }).join(' ');
+  }
 }
