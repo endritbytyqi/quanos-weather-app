@@ -21,5 +21,6 @@ class LocationController extends GetxController {
     } catch (e) {
       errorMessage.value = e.toString();
     }
+    return null;
   }
 }

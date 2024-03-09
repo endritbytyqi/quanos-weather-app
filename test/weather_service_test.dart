@@ -17,7 +17,6 @@ void main() {
     });
 
     test('Fetches weather data successfully for city', () async {
-      // Arrange
       const city = "Test City";
       const unit = "metric";
       final responsePayload = {
@@ -34,17 +33,14 @@ void main() {
       );
       when(() => mockDio.get(any())).thenAnswer((_) async => response);
 
-      // Act
       final result = await weatherService.getWeatherForCity(city, unit);
 
-      // Assert
       expect(result.isSuccess, true);
       expect(result.data, isA<WeatherModel>());
       expect(result.data!.main!.temp, 20.0);
     });
 
     test('Fetches weather data successfully for location', () async {
-      // Arrange
       const lat = 40.7128;
       const lon = -74.0060;
       const unit = "metric";
@@ -62,7 +58,6 @@ void main() {
       );
       when(() => mockDio.get(any())).thenAnswer((_) async => response);
 
-      // Act
       final result = await weatherService.getWeatherForLocation(lat, lon, unit);
 
       // Assert
@@ -72,30 +67,24 @@ void main() {
     });
 
     test('Handles DioException', () async {
-      // Arrange
       const city = "Test City";
       const unit = "metric";
       when(() => mockDio.get(any()))
           .thenThrow(DioException(requestOptions: RequestOptions(path: '')));
 
-      // Act
       final result = await weatherService.getWeatherForCity(city, unit);
 
-      // Assert
       expect(result.isSuccess, false);
       expect(result.error, "Error fetching data!");
     });
 
     test('Handles generic error', () async {
-      // Arrange
       const city = "Test City";
       const unit = "metric";
       when(() => mockDio.get(any())).thenThrow(Exception());
 
-      // Act
       final result = await weatherService.getWeatherForCity(city, unit);
 
-      // Assert
       expect(result.isSuccess, false);
       expect(result.error, "No data found for the location provided!");
     });

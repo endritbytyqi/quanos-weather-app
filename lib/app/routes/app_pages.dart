@@ -12,7 +12,7 @@ class AppPages {
   static final routes = [
     GetPage(
       name: _Paths.WEATHER,
-      page: () => WeatherView(),
+      page: () => const WeatherView(),
       binding: WeatherBinding(),
     ),
   ];
