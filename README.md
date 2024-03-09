@@ -17,7 +17,7 @@ Follow these steps to get started with Quanos Weather App:
 
 To use the app, you need to provide your own API key for weather data. Follow these steps to set up your API key:
 
-1. Create an account on the weather data provider's website (e.g., OpenWeatherMap, Weatherstack).
+1. Create an account on the OpenWeatherMap website.
 2. Generate an API key in your account dashboard.
 3. Copy the API key.
 4. In the project directory, create a new file named `config.json` in the `config` directory.
